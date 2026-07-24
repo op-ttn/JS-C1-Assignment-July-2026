@@ -1,0 +1,57 @@
+---
+description: Support Ticket Management System — Core project conventions and constraints
+alwaysApply: true
+---
+
+# Support Ticket System — Project Rules
+
+## Scope
+
+- Build **Core only**. Defer Stretch (auth, pagination, OpenAPI, Docker, CI, user CRUD).
+- Follow docs under `docs/` — especially `implementation-plan.md`, `api-endpoints.md`, `entities.md`.
+- Prefer the **smallest change** that completes the current milestone.
+- **Do not modify unrelated files.** Touch only what the current task requires.
+- Do not generate code when the user asks for plans/docs only.
+- When asked to implement: do **one milestone only**, stop at its exit criteria, and do not start the next.
+
+## Stack
+
+- Language: **JavaScript** (ES modules) per project plan — not TypeScript unless explicitly requested.
+- Frontend: React + Vite in `src/frontend`
+- Backend: Node.js + Express in `src/backend`
+- DB: SQLite via Prisma; migrations + seed required
+- Prefer **async/await** over raw promise chains.
+- **Ask before introducing new libraries.** Prefer the existing stack; justify any addition.
+
+## Code quality
+
+- Write **modular** code: small modules with a single clear responsibility (SOLID where practical).
+- Keep React components **under 300 lines**; split UI, data fetching, and helpers when approaching that limit.
+- Follow **ESLint** once configured; do not disable rules to silence real issues.
+- Explain **major design decisions** in `design-notes.md` / PR notes (state machine, API shapes, terminal-ticket rules).
+
+## Domain rules
+
+- Statuses: `OPEN` | `IN_PROGRESS` | `RESOLVED` | `CLOSED` | `CANCELLED`
+- Priorities: `LOW` | `MEDIUM` | `HIGH`
+- Enforce transitions only via a pure `stateMachine` module and `POST /api/tickets/:id/status`
+- Never allow status changes through `PATCH /api/tickets/:id`
+- Terminal (`CLOSED`, `CANCELLED`): block field edits; allow comments
+- No auth in Core — seeded users + UI picker for `createdBy` / assignee
+
+## API conventions
+
+- Base path `/api`; success `{ data }`; errors `{ error: { code, message, details? } }`
+- Validate on the backend (Zod); reject invalid input with `400`
+- Include `allowedTransitions` on ticket detail responses
+
+## Testing
+
+- **Mandatory:** state-machine integration tests (Jest + Supertest) — valid transitions succeed, invalid are rejected.
+- Do not expand into broad unit/component suites unless asked (Stretch). Prefer tests that prove Core acceptance criteria.
+
+## Security & ops
+
+- **Never hardcode secrets.** No API keys, passwords, or tokens in source. Use `.env.example` only; never commit `.env` or `*.db`.
+- Each milestone must remain independently runnable (`docs/implementation-plan.md`).
+- Keep assessment artifacts and `ai-prompts/` updated alongside implementation.

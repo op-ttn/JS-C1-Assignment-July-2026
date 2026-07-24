@@ -1,0 +1,51 @@
+// Support Ticket Management System — Core schema
+// Matches docs/entities.md
+// Priority/Status stored as strings (SQLite); validated at the API layer (M2+)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      String
+  createdAt DateTime @default(now())
+
+  createdTickets  Ticket[]  @relation("TicketCreator")
+  assignedTickets Ticket[]  @relation("TicketAssignee")
+  comments        Comment[]
+}
+
+model Ticket {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  priority    String // LOW | MEDIUM | HIGH
+  status      String   @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED | CLOSED | CANCELLED
+  assignedTo  String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator  User      @relation("TicketCreator", fields: [createdBy], references: [id])
+  assignee User?     @relation("TicketAssignee", fields: [assignedTo], references: [id])
+  comments Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  message   String
+  createdBy String
+  createdAt DateTime @default(now())
+
+  ticket  Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  creator User   @relation(fields: [createdBy], references: [id])
+}

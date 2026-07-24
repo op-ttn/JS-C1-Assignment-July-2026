@@ -1,0 +1,28 @@
+{
+  "name": "ai-practical-assessment",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Support Ticket Management System (Core)",
+  "workspaces": [
+    "src/backend",
+    "src/frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev -w src/backend",
+    "dev:frontend": "npm run dev -w src/frontend",
+    "lint": "npm run lint -w src/backend && npm run lint -w src/frontend",
+    "test": "npm run test -w src/backend",
+    "db:env": "node -e \"const fs=require('fs'); const src=fs.existsSync('.env')?'.env':'.env.example'; fs.copyFileSync(src,'src/backend/.env'); console.log('Synced',src,'-> src/backend/.env');\"",
+    "db:generate": "npm run db:env && npm run db:generate -w src/backend",
+    "db:migrate": "npm run db:env && npm run db:migrate -w src/backend",
+    "db:seed": "npm run db:env && npm run db:seed -w src/backend",
+    "db:setup": "npm run db:env && npm run db:setup -w src/backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
